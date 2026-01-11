@@ -1,0 +1,334 @@
+@charset "UTF-8";
+
+/* 予約管理システム用スタイルシート */
+
+/* ============================================
+   カラーパレット
+   ============================================ */
+:root {
+	--primary-color: #00a29f;
+	--secondary-color: #6c757d;
+	--danger-color: #dc3545;
+	--bg-light: #f8f9fa;
+	--text-dark: #343a40;
+	--text-gray: #495057;
+	--border-light: #e9ecef;
+}
+
+/* ============================================
+   基本設定
+   ============================================ */
+body {
+	font-family: 'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Arial', sans-serif;
+	margin: 0;
+	padding: 0;
+	background-color: var(--bg-light);
+	color: var(--text-gray);
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+/* ============================================
+   タイポグラフィ
+   ============================================ */
+h1 {
+	font-size: 2.2rem;
+	color: var(--primary-color);
+	border-bottom: 4px solid var(--primary-color);
+	padding-bottom: 12px;
+	margin-bottom: 30px;
+}
+
+h2 {
+	font-size: 1.6rem;
+	color: var(--text-dark);
+	border-bottom: 1px solid var(--border-light);
+	padding-bottom: 5px;
+	margin-top: 30px;
+	margin-bottom: 15px;
+}
+
+p {
+	line-height: 1.7;
+	margin-bottom: 15px;
+}
+
+/* ============================================
+   メインコンテナ
+   ============================================ */
+.container {
+	flex-grow: 1;
+	width: 90%;
+	max-width: 1000px;
+	margin: 25px auto;
+	padding: 40px;
+	background-color: white;
+	border-radius: 10px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================
+   メッセージ表示
+   ============================================ */
+.error-message,
+.success-message {
+	padding: 15px 25px;
+	margin-bottom: 25px;
+	border-radius: 5px;
+	font-weight: 700;
+	border: 1px solid transparent;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+.error-message {
+	color: var(--danger-color);
+	background-color: #fce4e4;
+	border-color: #fccbcb;
+}
+
+.success-message {
+	color: var(--primary-color);
+	background-color: #e6f7f7;
+	border-color: #b0e0e0;
+}
+
+/* メッセージ内のspan要素 */
+.error-message span,
+.success-message span {
+	display: inline;
+}
+
+/* フォーム内のエラーメッセージ（インライン表示用） */
+span.error-message {
+	display: block;
+	padding: 8px 12px;
+	margin-top: 6px;
+	margin-bottom: 0;
+	font-size: 0.9rem;
+	font-weight: 600;
+	border-radius: 4px;
+}
+
+/* エラーメッセージが空の場合は非表示 */
+span.error-message:empty {
+	display: none;
+}
+
+/* ============================================
+   フォーム要素
+   ============================================ */
+form p {
+	margin-bottom: 20px;
+}
+
+label {
+	display: block;
+	margin-bottom: 6px;
+	font-weight: 700;
+	color: var(--text-dark);
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="date"],
+input[type="time"],
+select {
+	width: 100%;
+	padding: 12px;
+	border: 1px solid #ced4da;
+	border-radius: 6px;
+	box-sizing: border-box;
+	transition: border-color 0.2s, box-shadow 0.2s;
+	font-size: 1rem;
+	background-color: white;
+}
+
+input:focus,
+select:focus {
+	border-color: var(--primary-color);
+	outline: none;
+	box-shadow: 0 0 0 0.2rem rgba(0, 162, 159, 0.2);
+}
+
+/* フィルタフォーム */
+.filter-form {
+	display: flex;
+	gap: 20px;
+	align-items: flex-end;
+	margin-bottom: 30px;
+	padding: 20px;
+	border: 1px solid var(--border-light);
+	border-radius: 6px;
+	background-color: #fcfcfc;
+}
+
+.filter-form div {
+	display: flex;
+	flex-direction: column;
+}
+
+/* ============================================
+   ボタン
+   ============================================ */
+.button,
+button[type="submit"] {
+	display: inline-block;
+	padding: 12px 25px;
+	margin-top: 5px;
+	font-size: 1rem;
+	font-weight: 700;
+	text-align: center;
+	text-decoration: none;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: background-color 0.2s, box-shadow 0.2s;
+	border: 1px solid transparent;
+	box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+	background-color: var(--primary-color);
+	color: white;
+	border-color: var(--primary-color);
+}
+
+.button:hover,
+button[type="submit"]:hover {
+	background-color: #008784;
+	border-color: #00706e;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* セカンダリボタン */
+.button.secondary {
+	background-color: var(--secondary-color);
+	border-color: var(--secondary-color);
+}
+
+.button.secondary:hover {
+	background-color: #5a6268;
+	border-color: #4e555b;
+}
+
+/* 危険操作ボタン */
+.button.danger {
+	background-color: var(--danger-color);
+	border-color: var(--danger-color);
+}
+
+.button.danger:hover {
+	background-color: #c82333;
+	border-color: #bd2130;
+}
+
+/* ボタングループ */
+.button-group,
+.main-nav {
+	display: flex;
+	gap: 15px;
+	margin-top: 30px;
+	margin-bottom: 30px;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.button-group button,
+.button-group a {
+	margin: 0;
+}
+
+/* ============================================
+   テーブル
+   ============================================ */
+table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 25px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+table th,
+table td {
+	padding: 14px 18px;
+	text-align: left;
+	border-bottom: 1px solid var(--border-light);
+}
+
+table thead tr {
+	background-color: #e8f5f4;
+	color: var(--text-dark);
+}
+
+table th {
+	font-weight: 700;
+}
+
+table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+table tbody tr:nth-child(even) {
+	background-color: #fefefe;
+}
+
+table tbody tr:hover {
+	background-color: #e8f9ff;
+}
+
+/* テーブル内のボタン */
+table td .button,
+table td button {
+	padding: 8px 13px;
+	font-size: 0.8rem;
+	margin: 3px 5px 0 0;
+}
+
+table td form {
+	display: inline;
+}
+
+/* ============================================
+   レスポンシブ対応
+   ============================================ */
+@media (max-width: 768px) {
+	.container {
+		width: 95%;
+		padding: 20px;
+		margin: 15px auto;
+	}
+
+	h1 {
+		font-size: 1.8rem;
+	}
+
+	h2 {
+		font-size: 1.4rem;
+	}
+
+	.filter-form {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.button-group,
+	.main-nav {
+		flex-direction: column;
+	}
+
+	.button-group .button,
+	.main-nav .button,
+	.button-group button {
+		width: 100%;
+	}
+
+	table {
+		font-size: 0.9rem;
+	}
+
+	table th,
+	table td {
+		padding: 10px 12px;
+	}
+}

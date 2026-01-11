@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+	<meta charset="UTF-8">
+	<title>全シフト管理 - 予約管理システム</title>
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+	<div class="container">
+		<h1>全スタッフシフト管理</h1>
+		<p>全てのスタッフのシフトを登録・編集・削除できます。</p>
+
+		<div th:if="${param.success}" class="success-message">
+			<span th:if="${param.success[0] == 'shiftUpdated'}">シフトを登録・更新しました。</span>
+			<span th:if="${param.success[0] == 'shiftDeleted'}">シフトを削除しました。</span>
+		</div>
+
+		<h2>シフト登録/更新</h2>
+		<form th:action="@{/admin/shifts/create-update}" method="post">
+			<p>
+				<label for="staffId">スタッフ選択:</label>
+				<select id="staffId" name="staffId" required>
+					<option value="">選択してください</option>
+					<option th:each="staff : ${staffs}" th:value="${staff.id}" th:text="${staff.name}"></option>
+				</select>
+			</p>
+			<p>
+				<label for="date">日付:</label>
+				<input type="date" id="date" name="date" required>
+			</p>
+			<p>
+				<label for="startTime">開始時間:</label>
+				<input type="time" id="startTime" name="startTime" required>
+			</p>
+			<p>
+				<label for="endTime">終了時間:</label>
+				<input type="time" id="endTime" name="endTime" required>
+			</p>
+			<div class="button-group">
+				<button type="submit">この内容で登録/更新</button>
+			</div>
+		</form>
+
+		<hr style="margin: 40px 0;">
+
+		<h2>登録済みシフト一覧（全スタッフ）</h2>
+
+		<div th:if="${#lists.isEmpty(allShifts)}">
+			<p>現在、登録されているシフトはありません。</p>
+		</div>
+
+		<table th:if="${not #lists.isEmpty(allShifts)}">
+			<thead>
+				<tr>
+					<th>スタッフ名</th>
+					<th>日付</th>
+					<th>開始時間</th>
+					<th>終了時間</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="shift : ${allShifts}">
+					<td th:text="${shift.staff.name}" style="font-weight: bold;"></td>
+					<td th:text="${shift.date}"></td>
+					<td th:text="${shift.startTime}"></td>
+					<td th:text="${shift.endTime}"></td>
+					<td>
+						<form th:action="@{/admin/shifts/{id}/delete(id=${shift.id})}" method="post"
+							onsubmit="return confirm('このシフトを削除してもよろしいですか？');">
+							<button type="submit" class="button danger">削除</button>
+						</form>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<div class="button-group" style="margin-top: 20px;">
+			<a th:href="@{/dashboard}" class="button secondary">ダッシュボードへ戻る</a>
+		</div>
+	</div>
+</body>
+
+</html>

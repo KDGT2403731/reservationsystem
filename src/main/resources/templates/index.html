@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<!-- ページタイトル -->
+	<title>トップ - 予約管理システム</title>
+	<!-- 共通スタイルシート -->
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+	<div class="container">
+		<h1>予約管理システム</h1>
+		<p>当システムをご利用いただき、ありがとうございます。</p>
+		<p>予約の登録、確認、変更などの機能をご利用いただけます。</p>
+		
+		<h2>システムの主な機能</h2>
+		<p>
+			一般ユーザー向け機能として、予約の新規登録、予約内容の確認、予約の変更・キャンセルなどを行うことができます。
+			スタッフの方は予約管理やキャンセル待ち管理機能をご利用いただけます。
+			管理者の方は予約統計の確認やCSV出力、シフト管理などの機能もご利用いただけます。
+		</p>
+		
+		<div class="button-group">
+			<a th:href="@{/login}" class="button">ログインページへ</a>
+		</div>
+	</div>
+</body>
+
+</html>

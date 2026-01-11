@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+	<!-- 文字コードを UTF-8 に指定 -->
+	<meta charset="UTF-8">
+	<!-- ページタイトル -->
+	<title>顧客ダッシュボード - 予約管理システム</title>
+	<!-- 共通スタイルシートを読み込む -->
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+	<div class="container">
+		<h1>顧客ダッシュボード</h1>
+		<p>ようこそ、<span sec:authentication="name"></span>さん！</p>
+		<!-- メインナビ（予約登録／履歴／ログアウト） -->
+		<div class="main-nav">
+			<!-- 予約登録ページへ -->
+			<a th:href="@{/reservation/new}" class="button">予約登録</a>
+			<!-- 自身の予約履歴へ -->
+			<a th:href="@{/reservation/history}" class="button">予約履歴</a>
+			<!-- ログアウトフォーム（POST）。CSRF トークン hidden を入れるのが安全 -->
+			<form th:action="@{/logout}" method="post" style="display:inline;">
+				<!-- 送信ボタン -->
+				<button type="submit" class="button secondary">ログアウト</button>
+			</form>
+		</div>
+		<!-- 直近予約の簡易一覧（DashboardController では履歴一覧を model に投入） -->
+		<h2>あなたの予約</h2>
+		<!-- 表形式で表示 -->
+		<table>
+			<thead>
+				<tr>
+					<th>スタッフ</th>
+					<th>日付</th>
+					<th>時間</th>
+					<th>メニュー</th>
+					<th>ステータス</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="reservation : ${userReservations}">
+					<!-- スタッフ名の表示 -->
+					<td th:text="${reservation.staff.name}"></td>
+					<!-- 予約日（ISO 表示。必要なら #temporals で整形） -->
+					<td th:text="${reservation.date}"></td>
+					<!-- 予約時間 -->
+					<td th:text="${reservation.timeSlot}"></td>
+					<!-- メニュー名 -->
+					<td th:text="${reservation.menu}"></td>
+					<!-- ステータス -->
+					<td th:text="${reservation.status}"></td>
+				</tr>
+				<!-- データが無い場合の代替行 -->
+				<tr th:if="${#lists.isEmpty(userReservations)}">
+					<!-- 5 列分まとめて表示 -->
+					<td colspan="5">予約がありません。</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+
+</html>

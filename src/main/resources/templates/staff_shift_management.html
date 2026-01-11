@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+	<meta charset="UTF-8">
+	<title>マイシフト確認 - 予約管理システム</title>
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+	<div class="container">
+		<h1>マイシフト確認</h1>
+		<p th:text="${#authentication.principal.username} + ' さんの確定済みシフト一覧です。'"></p>
+
+		<div th:if="${param.success}" class="success-message">
+			<span th:if="${param.success[0] == 'shiftUpdated'}">シフトが更新されました。</span>
+		</div>
+
+		<h2>あなたのシフト一覧</h2>
+
+		<div th:if="${#lists.isEmpty(staffShifts)}">
+			<p>現在、登録されているシフトはありません。</p>
+		</div>
+
+		<table th:if="${not #lists.isEmpty(staffShifts)}">
+			<thead>
+				<tr>
+					<th>日付</th>
+					<th>開始時間</th>
+					<th>終了時間</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="shift : ${staffShifts}">
+					<td th:text="${shift.date}"></td>
+					<td th:text="${shift.startTime}"></td>
+					<td th:text="${shift.endTime}"></td>
+				</tr>
+			</tbody>
+		</table>
+
+		<div class="button-group" style="margin-top: 20px;">
+			<a th:href="@{/dashboard}" class="button">ダッシュボードへ戻る</a>
+		</div>
+	</div>
+</body>
+
+</html>

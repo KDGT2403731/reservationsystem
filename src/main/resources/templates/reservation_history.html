@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+	<meta charset="UTF-8">
+	<!-- ページタイトル -->
+	<title>予約履歴 - 予約管理システム</title>
+	<!-- 共通スタイルの読み込み -->
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+	<div class="container">
+		<h1>予約履歴</h1>
+		<p>あなたの予約履歴です。</p>
+		<div th:if="${param.success}" class="success-message">
+			<span th:if="${param.success[0] == 'created'}">予約が登録されました。</span>
+			<span th:if="${param.success[0] == 'updated'}">予約が更新されました。</span>
+			<span th:if="${param.success[0] == 'cancelled'}">予約がキャンセルされました。</span>
+			<span th:if="${param.success[0] == 'confirmed'}">キャンセル待ちから予約が確定されました。</span>
+		</div>
+		<table>
+			<thead>
+				<tr>
+					<!-- スタッフ名 -->
+					<th>スタッフ</th>
+					<!-- 日付（yyyy-MM-dd で表示） -->
+					<th>日付</th>
+					<!-- 時間（HH:mm で表示） -->
+					<th>時間</th>
+					<!-- メニュー名 -->
+					<th>メニュー</th>
+					<!-- ステータス -->
+					<th>ステータス</th>
+					<!-- 操作（編集・キャンセル） -->
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="reservation : ${userReservations}">
+					<!-- スタッフ名（未割り当て時は代替表示） -->
+					<td th:text="${reservation.staff != null ? reservation.staff.name : '未割り当て'}"></td>
+					<!-- 日付を yyyy-MM-dd で整形表示 -->
+					<td th:text="${#temporals.format(reservation.date, 'yyyy-MM-dd')}"></td>
+					<!-- 時間を HH:mm で整形表示 -->
+					<td th:text="${#temporals.format(reservation.timeSlot, 'HH:mm')}"></td>
+					<!-- メニュー名 -->
+					<td th:text="${reservation.menu}"></td>
+					<!-- ステータス -->
+					<td th:text="${reservation.status}"></td>
+					<!-- 行内操作セル -->
+					<td>
+						<a th:href="@{/reservation/{id}/edit(id=${reservation.id})}" class="button secondary">編集</a>
+						<form th:action="@{/reservation/{id}/cancel(id=${reservation.id})}" method="post"
+							style="display:inline;">
+							<button type="submit" class="button danger"
+								onclick="return confirm('本当にキャンセルしますか？');">キャンセル</button>
+						</form>
+					</td>
+				</tr>
+				<tr th:if="${#lists.isEmpty(userReservations)}">
+					<td colspan="6">予約がありません。</td>
+				</tr>
+			</tbody>
+		</table>
+		<div class="button-group">
+			<!-- キャンセル待ち登録へのリンクを追加 -->
+			<a th:href="@{/waitlist/register}" class="button">キャンセル待ち登録</a>
+			<!-- 戻るリンク -->
+			<a th:href="@{/dashboard}" class="button secondary">ダッシュボードに戻る</a>
+		</div>
+	</div>
+</body>
+
+</html>

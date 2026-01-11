@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+	<meta charset="UTF-8">
+	<!-- ブラウザタブに表示されるページタイトル -->
+	<title>全予約管理 - 予約管理システム</title>
+	<!-- 外部 CSS を Thymeleaf の URL 解決で読み込む -->
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+	<div class="container">
+		<h1>全予約管理</h1>
+		<p>システム内の全ての予約を表示します。</p>
+		<form th:action="@{/admin/reservations}" method="get" class="filter_form">
+			<div>
+			    <label for="startDate">開始日:</label>
+			    <input type="date" id="startDate" name="startDate"
+			        th:value="${param.startDate != null and param.startDate[0] != '' ? param.startDate[0] : ''}">
+			</div>
+			<div>
+			    <label for="endDate">終了日:</label>
+			    <input type="date" id="endDate" name="endDate"
+			        th:value="${param.endDate != null and param.endDate[0] != '' ? param.endDate[0] : ''}">
+			</div>
+			<button type="submit" class="button">フィルタ</button>
+		</form>
+		<table>
+			<thead>
+				<tr>
+					<!-- 予約 ID 列 -->
+					<th>ID</th>
+					<!-- 顧客名列 -->
+					<th>顧客名</th>
+					<!-- スタッフ名列（未割り当ての可能性あり） -->
+					<th>スタッフ</th>
+					<!-- 日付列（yyyy-MM-dd 表示想定） -->
+					<th>日付</th>
+					<!-- 時間列（HH:mm 表示想定） -->
+					<th>時間</th>
+					<!-- メニュー列 -->
+					<th>メニュー</th>
+					<!-- ステータス列（予約済/キャンセル済） -->
+					<th>ステータス</th>
+					<!-- 操作列（編集/キャンセルのアクション） -->
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="reservation : ${allReservations}">
+					<!-- 予約 ID を表示 -->
+					<td th:text="${reservation.id}"></td>
+					<!-- 顧客名を表示 -->
+					<td th:text="${reservation.user.name}"></td>
+					<!-- スタッフ名。null の場合は '未割り当て' を表示 -->
+					<td th:text="${reservation.staff != null ? reservation.staff.name : '未割り当て'}"></td>
+					<!-- 予約日を yyyy-MM-dd で表示（Thymeleaf #temporals 利用） -->
+					<td th:text="${#temporals.format(reservation.date, 'yyyy-MM-dd')}"></td>
+					<!-- 予約時間を HH:mm で表示 -->
+					<td th:text="${#temporals.format(reservation.timeSlot, 'HH:mm')}"></td>
+					<!-- メニュー名を表示 -->
+					<td th:text="${reservation.menu}"></td>
+					<!-- ステータスを表示 -->
+					<td th:text="${reservation.status}"></td>
+					<td>
+						<a th:href="@{/reservation/{id}/edit(id=${reservation.id})}" class="button secondary">編集</a>
+						<form th:action="@{/reservation/{id}/cancel(id=${reservation.id})}" method="post"
+							style="display: inline;">
+							<button type="submit" class="button danger"
+								onclick="return confirm('本当にキャンセルしますか？');">キャンセル</button>
+						</form>
+					</td>
+				</tr>
+				<tr th:if="${#lists.isEmpty(allReservations)}">
+					<td colspan="8">予約がありません。</td>
+				</tr>
+			</tbody>
+		</table>
+		<div class="button-group">
+			<a th:href="@{/dashboard}" class="button secondary">ダッシュボードに戻る</a>
+		</div>
+	</div>
+</body>
+
+</html>

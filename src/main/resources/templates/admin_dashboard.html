@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+	<meta charset="UTF-8">
+	<title>管理者ダッシュボード - 予約管理システム</title>
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+	<div class="container">
+		<h1>管理者ダッシュボード</h1>
+		<p>ようこそ、<span sec:authentication="name"></span>さん！（管理者）</p>
+		<div class="main-nav">
+			<a th:href="@{/admin/reservations}" class="button">全予約管理</a>
+			<a th:href="@{/admin/shifts}" class="button">全シフト管理</a>
+			<a th:href="@{/admin/statistics}" class="button">統計データ</a>
+			<form th:action="@{/logout}" method="post" style="display:inline;">
+				<button type="submit" class="button secondary">ログアウト</button>
+			</form>
+		</div>
+		<h2>最近の予約</h2>
+		<table>
+			<thead>
+				<tr>
+					<th>顧客名</th>
+					<th>スタッフ</th>
+					<th>日付</th>
+					<th>時間</th>
+					<th>メニュー</th>
+					<th>ステータス</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!-- recentReservations をループして 1 予約 = 1 行で表示 -->
+				<tr th:each="reservation : ${recentReservations}">
+					<!-- 予約の顧客名を表示 -->
+					<td th:text="${reservation.user.name}"></td>
+					<!-- スタッフが null の場合は '未割り当て' と表示 -->
+					<td th:text="${reservation.staff != null ? reservation.staff.name : '未割り当て'}"></td>
+					<!-- 予約日を yyyy-MM-dd 形式で表示（#temporals は Thymeleaf の日時ユーティリティ） -->
+					<td th:text="${#temporals.format(reservation.date, 'yyyy-MM-dd')}"></td>
+					<!-- 時刻を HH:mm 形式で表示 -->
+					<td th:text="${#temporals.format(reservation.timeSlot, 'HH:mm')}"></td>
+					<!-- メニュー名を表示 -->
+					<td th:text="${reservation.menu}"></td>
+					<!-- ステータスを表示 -->
+					<td th:text="${reservation.status}"></td>
+				</tr>
+				<!-- 一件もない場合の代替行（colspan=6 で列をまたいでメッセージ表示） -->
+				<tr th:if="${#lists.isEmpty(recentReservations)}">
+					<td colspan="6">最近の予約はありません。</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+
+</html>
