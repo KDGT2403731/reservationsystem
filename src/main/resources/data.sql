@@ -6,6 +6,7 @@ INSERT INTO users (name, email, password, role) VALUES
 	-- スタッフ（ログイン ID: staffA@example.com / 仮パスワード: staffpass
 	('スタッフ A', 'staffA@example.com', 'staffpass', 'STAFF'),
 	('スタッフ B', 'staffB@example.com', 'staffpass', 'STAFF'),
+	('スタッフ C', 'staffC@example.com', 'staffpass', 'STAFF'),
 	-- 管理者（ログイン ID: adminC@example.com / 仮パスワード: adminpass）
 	('管理者 C', 'adminC@example.com', 'adminpass', 'ADMIN');
 	
