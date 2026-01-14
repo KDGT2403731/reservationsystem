@@ -3,7 +3,7 @@ INSERT INTO users (name, email, password, role) VALUES
 	('顧客 A', 'customerA@example.com', 'password', 'CUSTOMER'),
 	('顧客 B', 'customerB@example.com', 'password', 'CUSTOMER'),
 	('顧客 C', 'customerC@example.com', 'password', 'CUSTOMER'),
-	-- スタッフ（ログイン ID: staffA@example.com / 仮パスワード: staffpass
+	-- スタッフ（ログイン ID: staffA@example.com / 仮パスワード: staffpass)
 	('スタッフ A', 'staffA@example.com', 'staffpass', 'STAFF'),
 	('スタッフ B', 'staffB@example.com', 'staffpass', 'STAFF'),
 	('スタッフ C', 'staffC@example.com', 'staffpass', 'STAFF'),
