@@ -7,8 +7,8 @@ INSERT INTO users (name, email, password, role) VALUES
 	('スタッフ A', 'staffA@example.com', 'staffpass', 'STAFF'),
 	('スタッフ B', 'staffB@example.com', 'staffpass', 'STAFF'),
 	('スタッフ C', 'staffC@example.com', 'staffpass', 'STAFF'),
-	-- 管理者（ログイン ID: adminC@example.com / 仮パスワード: adminpass）
-	('管理者 C', 'adminC@example.com', 'adminpass', 'ADMIN');
+	-- 管理者（ログイン ID: adminA@example.com / 仮パスワード: adminpass）
+	('管理者 A', 'adminA@example.com', 'adminpass', 'ADMIN');
 	
 INSERT INTO shift (staff_id, record_date, start_time, end_time) VALUES
 	((SELECT id FROM users WHERE email = 'staffA@example.com'), CURRENT_DATE, '09:00:00', '17:00:00'),
