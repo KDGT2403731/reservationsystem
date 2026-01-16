@@ -15,75 +15,76 @@
 			ここでは自身の出勤予定（シフト）の登録・確認ができます。
 		</p>
 
+		<!-- 成功メッセージ（?success=shiftUpdated/shiftDeleted） -->
 		<div th:if="${param.success}" class="success-message">
-			<p th:if="${param.success[0] == 'shiftUpdated'}" style="color: green;">シフトを登録・更新しました。</p>
-			<p th:if="${param.success[0] == 'shiftDeleted'}" style="color: blue;">シフトを削除しました。</p>
-		</div>
-		<div th:if="${error}" class="error-message">
-			<p th:text="${error}" style="color: red;"></p>
+			<!-- 更新成功 -->
+			<span th:if="${param.success[0] == 'shiftUpdated'}">シフトが更新されました。</span>
+			<!-- 削除成功 -->
+			<span th:if="${param.success[0] == 'shiftDeleted'}">シフトが削除されました。</span>
 		</div>
 
-		<section class="form-section">
-			<h2>シフトの登録・変更</h2>
-			<form th:action="@{/staff/shifts/save}" method="post">
-				<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+		<h2>シフトの登録・変更</h2>
+		<form th:action="@{/staff/shifts}" method="post">
+			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
-				<div class="form-group">
-					<label for="date">日付:</label>
-					<input type="date" id="date" name="date" required
-						th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
-				</div>
-				<div class="form-group">
-					<label for="startTime">開始時間:</label>
-					<input type="time" id="startTime" name="startTime" required>
-				</div>
-				<div class="form-group">
-					<label for="endTime">終了時間:</label>
-					<input type="time" id="endTime" name="endTime" required>
-				</div>
-				<button type="submit" class="btn-save">この内容で登録する</button>
-			</form>
-		</section>
+			<p>
+				<!-- ラベル -->
+				<label for="startTime">開始時間:</label>
+				<!-- type=time の入力欄 -->
+				<input type="time" id="startTime" name="startTime" required>
+			</p>
+			<!-- 終了時刻入力 -->
+			<p>
+				<!-- ラベル -->
+				<label for="endTime">終了時間:</label>
+				<!-- type=time の入力欄 -->
+				<input type="time" id="endTime" name="endTime" required>
+			</p>
+			<!-- 送信ボタン -->
+			<div class="button-group">
+				<!-- シフト登録/更新実行 -->
+				<button type="submit">この内容で登録する</button>
+			</div>
+		</form>
 
 		<hr style="margin: 40px 0;">
 
-		<section class="list-section">
-			<h2>現在の登録状況</h2>
-			<div th:if="${#lists.isEmpty(staffShifts)}">
-				<p>現在、予定されているシフトはありません。</p>
-			</div>
+		<h2>現在の登録状況</h2>
 
-			<table th:if="${not #lists.isEmpty(staffShifts)}">
-				<thead>
-					<tr>
-						<th>日付</th>
-						<th>開始時間</th>
-						<th>終了時間</th>
-						<th>操作</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr th:each="shift : ${staffShifts}">
-						<td th:text="${shift.date}"
-							th:style="${shift.date == #temporals.createNow().toLocalDate() ? 'font-weight:bold; color:red;' : ''}">
-						</td>
-						<td th:text="${shift.startTime}"></td>
-						<td th:text="${shift.endTime}"></td>
-						<td>
-							<form th:action="@{/staff/shifts/delete}" method="post" style="display:inline;">
-								<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-								<input type="hidden" name="shiftId" th:value="${shift.id}">
-								<button type="submit" class="btn-delete"
-									onclick="return confirm('このシフトを削除してもよろしいですか？')">削除</button>
-							</form>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</section>
+		<table th:if="${not #lists.isEmpty(staffShifts)}">
+			<thead>
+				<tr>
+					<th>日付</th>
+					<th>開始時間</th>
+					<th>終了時間</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="shift : ${staffShifts}">
+					<td th:text="${shift.date}"></td>
+					<td th:text="${shift.startTime}"></td>
+					<td th:text="${shift.endTime}"></td>
+					<td>
+						<form th:action="@{/staff/shifts/{id}/delete(id=${shift.id})}" method="post"
+							style="display:inline;">
+							<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+							<input type="hidden" name="shiftId" th:value="${shift.id}">
+							<button type="submit" class="button danger"
+								onclick="return confirm('このシフトを削除しますか？')">削除</button>
+						</form>
+					</td>
+				</tr>
+				<tr th:if="${#lists.isEmpty(staffShifts)}">
+					<!-- 4 列分まとめてメッセージ表示 -->
+					<td colspan="4">シフトがありません。</td>
+				</tr>
+			</tbody>
+		</table>
 
-		<div class="button-group" style="margin-top: 20px;">
-			<a th:href="@{/staff/dashboard}" class="btn-back">ダッシュボードに戻る</a>
+		<div class="button-group">
+			<!-- ダッシュボードへ戻る -->
+			<a th:href="@{/dashboard}" class="button secondary">ダッシュボードに戻る</a>
 		</div>
 	</div>
 </body>
