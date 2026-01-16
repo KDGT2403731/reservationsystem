@@ -97,8 +97,8 @@ public class StaffController {
 	}
 
 	// スタッフが自分のシフトを登録・更新
-	@PostMapping("/shifts/create-update")
-	public String createOrUpdateMyShift(
+	@PostMapping("/shifts/")
+	public String createOrUpdateStaffShift(
 			@AuthenticationPrincipal UserDetails userDetails,
 			@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
 			@RequestParam("startTime") @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime startTime,
