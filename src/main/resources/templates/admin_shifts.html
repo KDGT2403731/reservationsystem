@@ -19,9 +19,7 @@
 
 		<h2>シフト登録/更新</h2>
 		<form th:action="@{/admin/shifts/create-update}" method="post">
-			<!-- 実運用では CSRF トークン hidden を入れる：
-				<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-			-->
+			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 			<p>
 				<label for="staffId">スタッフ選択:</label>
 				<select id="staffId" name="staffId" required>
