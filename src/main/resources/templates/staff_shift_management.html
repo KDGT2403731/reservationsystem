@@ -22,6 +22,10 @@
 			<!-- 削除成功 -->
 			<span th:if="${param.success[0] == 'shiftDeleted'}">シフトが削除されました。</span>
 		</div>
+		
+		<div th:if="${param.error}" class="error-message">
+		    <span th:if="${param.error[0] == 'unauthorized'}">このシフトを削除する権限がありません。</span>
+		</div>
 
 		<h2>シフトの登録・変更</h2>
 		<form th:action="@{/staff/shifts}" method="post">

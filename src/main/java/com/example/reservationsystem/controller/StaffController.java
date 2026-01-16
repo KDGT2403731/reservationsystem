@@ -113,7 +113,7 @@ public class StaffController {
 
 	// スタッフが自分のシフトを削除
 	@PostMapping("/shifts/{id}/delete")
-	public String deleteMyShift(
+	public String deleteStaffShift(
 			@AuthenticationPrincipal UserDetails userDetails,
 			@PathVariable("id") Long shiftId) {
 
@@ -127,7 +127,8 @@ public class StaffController {
 				.anyMatch(shift -> shift.getId().equals(shiftId));
 
 		if (!isMyShift) {
-			throw new RuntimeException("Unauthorized: You can only delete your own shifts");
+			// 例外をスローするのではなく、エラーメッセージ付きでリダイレクト
+			return "redirect:/staff/shifts?error=unauthorized";
 		}
 
 		shiftService.deleteShift(shiftId);
