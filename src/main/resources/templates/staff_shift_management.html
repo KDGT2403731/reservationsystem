@@ -14,6 +14,7 @@
 
 		<div th:if="${param.success}" class="success-message">
 			<span th:if="${param.success[0] == 'shiftUpdated'}">シフトが更新されました。</span>
+			<span th:if="${param.success[0] == 'shiftDeleted'}">シフトが削除されました。</span>
 		</div>
 
 		<h2>あなたのシフト一覧</h2>
