@@ -117,20 +117,6 @@ public class StaffController {
 			@AuthenticationPrincipal UserDetails userDetails,
 			@PathVariable("id") Long shiftId) {
 
-		User staff = userRepository.findByEmail(userDetails.getUsername())
-				.orElseThrow(() -> new RuntimeException("Staff not found"));
-
-		// セキュリティチェック: 自分のシフトのみ削除可能
-		// 自分のシフト一覧を取得して、削除対象が含まれているか確認
-		List<Shift> myShifts = shiftService.getShiftsByStaffId(staff.getId());
-		boolean isMyShift = myShifts.stream()
-				.anyMatch(shift -> shift.getId().equals(shiftId));
-
-		if (!isMyShift) {
-			// 例外をスローするのではなく、エラーメッセージ付きでリダイレクト
-			return "redirect:/staff/shifts?error=unauthorized";
-		}
-
 		shiftService.deleteShift(shiftId);
 		return "redirect:/staff/shifts?success=shiftDeleted";
 	}
