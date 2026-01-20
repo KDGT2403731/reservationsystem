@@ -12,4 +12,5 @@ INSERT INTO users (name, email, password, role) VALUES
 	
 INSERT INTO shift (staff_id, record_date, start_time, end_time) VALUES
 	((SELECT id FROM users WHERE email = 'staffA@example.com'), CURRENT_DATE, '09:00:00', '17:00:00'),
-	((SELECT id FROM users WHERE email = 'staffB@example.com'), CURRENT_DATE, '09:00:00', '17:00:00');
+	((SELECT id FROM users WHERE email = 'staffB@example.com'), CURRENT_DATE, '09:00:00', '17:00:00'),
+	((SELECT id FROM users WHERE email = 'staffC@example.com'), CURRENT_DATE, '09:00:00', '17:00:00');
