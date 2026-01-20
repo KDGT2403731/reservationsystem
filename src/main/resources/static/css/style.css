@@ -204,22 +204,26 @@ button[type="submit"]:hover {
 .button.secondary {
 	background-color: var(--secondary-color);
 	border-color: var(--secondary-color);
+	transition: all 0.3s ease;
 }
 
 .button.secondary:hover {
 	background-color: #5a6268;
 	border-color: #4e555b;
+	transform: translateY(-5px);
 }
 
 /* 危険操作ボタン */
 .button.danger {
 	background-color: var(--danger-color);
 	border-color: var(--danger-color);
+	transition: all 0.3s ease;
 }
 
 .button.danger:hover {
 	background-color: #c82333;
 	border-color: #bd2130;
+	transform: translateY(-5px);
 }
 
 /* ボタングループ */
