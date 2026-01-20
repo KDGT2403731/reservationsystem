@@ -16,6 +16,7 @@
 		<form
 			th:action="${reservation.id == null ? '/reservation/new' : '/reservation/' + reservation.id + '/edit'}"
 			method="post" onsubmit="return validateForm()">
+			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 			<!-- 入力ブロック：スタッフ選択 -->
 			<p>
 				<label for="staffId">スタッフ:</label>
