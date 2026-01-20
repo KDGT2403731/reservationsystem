@@ -51,9 +51,9 @@
 					<!-- 顧客名 -->
 					<td th:text="${reservation.user.name}"></td>
 					<!-- 日付（ISO。必要なら #temporals.format） -->
-					<td th:text="${reservation.date}"></td>
+					<td th:text="${#temporals.format(reservation.date, 'yyyy-MM-dd')}"></td>
 					<!-- 時間 -->
-					<td th:text="${reservation.timeSlot}"></td>
+					<td th:text="${#temporals.format(reservation.timeSlot, 'HH:mm')}"></td>
 					<!-- メニュー -->
 					<td th:text="${reservation.menu}"></td>
 					<!-- ステータス -->

@@ -45,9 +45,9 @@
 					<!-- スタッフ名の表示 -->
 					<td th:text="${reservation.staff.name}"></td>
 					<!-- 予約日（ISO 表示。必要なら #temporals で整形） -->
-					<td th:text="${reservation.date}"></td>
+					<td th:text="${#temporals.format(reservation.date, 'yyyy-MM-dd')}"></td>
 					<!-- 予約時間 -->
-					<td th:text="${reservation.timeSlot}"></td>
+					<td th:text="${#temporals.format(reservation.timeSlot, 'HH:mm')}"></td>
 					<!-- メニュー名 -->
 					<td th:text="${reservation.menu}"></td>
 					<!-- ステータス -->
