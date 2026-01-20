@@ -86,7 +86,7 @@ public class ReservationController {
 	public String updateReservation(
 			@PathVariable("id") Long reservationId,
 			@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-			@RequestParam("timeSlot") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalTime timeSlot,
+			@RequestParam("timeSlot") @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime timeSlot,
 			@RequestParam("menu") String menu,
 			Model model) {
 		try {
