@@ -314,7 +314,11 @@ table td form {
 
 	.filter-form {
 		flex-direction: column;
-		align-items: stretch;
+		gap: 10px;
+	}
+
+	.filter-form div {
+		width: 100%;
 	}
 
 	.button-group,
