@@ -59,76 +59,51 @@
 	</div>
 
 	<script>
-		// =====================================
-		// スタッフ用予約編集フォームの制御
-		// =====================================
 		document.addEventListener('DOMContentLoaded', function () {
-			// DOM要素の取得
 			const staffIdSelect = document.getElementById('staffId');
 			const dateInput = document.getElementById('date');
 			const timeSlotSelect = document.getElementById('timeSlot');
 			const form = document.getElementById('reservationForm');
 
 			/**
-			 * 利用可能な時間枠を取得してドロップダウンを更新する
+			 * 時間枠の更新処理
 			 */
 			async function updateTimeSlots() {
 				const staffId = staffIdSelect.value;
 				const date = dateInput.value;
-				const timeSlotError = document.getElementById('timeSlotError');
 
-				// エラーメッセージをクリア
-				timeSlotError.textContent = '';
-
-				// 時間枠のドロップダウンをリセット
-				timeSlotSelect.innerHTML = '';
-				const defaultOption = document.createElement('option');
-				defaultOption.value = '';
-				defaultOption.disabled = true;
-				defaultOption.selected = true;
-				defaultOption.textContent = '希望の時間を選択してください';
-				timeSlotSelect.appendChild(defaultOption);
-
-				// スタッフと日付が両方選択されていない場合は処理終了
+				// スタッフか日付が未選択なら処理しない
 				if (!staffId || !date) {
+					timeSlotSelect.innerHTML = '<option value="">時間を選択してください</option>';
 					return;
 				}
 
 				try {
-					// APIから利用可能な時間枠を取得
-					const params = new URLSearchParams({
-						staffId: staffId,
-						date: date
-					});
+					const response = await fetch(`/reservation/available-slots?staffId=${staffId}&date=${date}`);
 
-					const response = await fetch(`/reservation/available-slots?${params}`);
-
-					// レスポンスチェック
 					if (!response.ok) {
-						throw new Error(`HTTP error! status: ${response.status}`);
+						throw new Error('サーバーエラーが発生しました');
 					}
 
 					const data = await response.json();
+					timeSlotSelect.innerHTML = '<option value="">時間を選択してください</option>';
 
-					// データが存在し、配列の場合のみ処理
-					if (Array.isArray(data) && data.length > 0) {
-						// 既存の予約時間を保存
-						const currentReservationTime = timeSlotSelect.querySelector('option[value!=""]')?.value;
-
+					if (data && data.length > 0) {
 						data.forEach(slot => {
 							const option = document.createElement('option');
 
 							let displayTime = "";
 							let valueTime = "";
 
-							// LocalTimeが配列 [時, 分] で届く場合の処理
+							// JavaのLocalTimeが[時, 分]の配列で届く場合
 							if (Array.isArray(slot)) {
-								const hour = String(slot[0]).padStart(2, '0');
-								const minute = String(slot[1]).padStart(2, '0');
-								displayTime = `${hour}:${minute}`;
-								valueTime = `${hour}:${minute}:00`; // サーバー送信用のHH:mm:ss形式
-							} else if (typeof slot === 'string') {
-								// 万が一文字列で届いた場合のフォールバック
+								const hh = String(slot[0]).padStart(2, '0');
+								const mm = String(slot[1]).padStart(2, '0');
+								displayTime = `${hh}:${mm}`;
+								valueTime = `${hh}:${mm}:00`; // 秒まで含めてvalueにする
+							}
+							// 万が一文字列で届く場合
+							else if (typeof slot === 'string') {
 								displayTime = slot.substring(0, 5);
 								valueTime = slot;
 							}
@@ -137,89 +112,65 @@
 							option.textContent = displayTime;
 							timeSlotSelect.appendChild(option);
 						});
-
-						// 既存の予約時間があれば選択
-						if (currentReservationTime && data.includes(currentReservationTime)) {
-							timeSlotSelect.value = currentReservationTime;
-						}
 					} else {
-						// 利用可能な時間枠がない場合
-						const noOption = document.createElement('option');
-						noOption.value = '';
-						noOption.textContent = '利用可能な時間枠がありません';
-						timeSlotSelect.appendChild(noOption);
+						const option = document.createElement('option');
+						option.textContent = "予約可能な時間がありません";
+						option.disabled = true;
+						timeSlotSelect.appendChild(option);
 					}
 				} catch (error) {
-					// エラーハンドリング
-					console.error('時間枠取得エラー:', error);
-					const errorOption = document.createElement('option');
-					errorOption.value = '';
-					errorOption.textContent = '時間枠の取得に失敗しました';
-					timeSlotSelect.appendChild(errorOption);
-					timeSlotError.textContent = 'エラーが発生しました。ページを再度読み込んでください。';
+					console.error('Fetch error:', error);
+					// 画面上のエラーメッセージ要素に表示（なければalert）
+					const errorDiv = document.querySelector('.error-message');
+					if (errorDiv) {
+						errorDiv.textContent = '時間枠の取得に失敗しました。ページを再読み込みしてください。';
+					} else {
+						alert('エラーが発生しました。の原因をコンソールで確認してください。');
+					}
 				}
 			}
 
 			/**
-			 * フォーム送信時のバリデーション
+			 * バリデーション処理
 			 */
-			function validateForm() {
+			window.validateForm = function () {
 				let isValid = true;
+				// メッセージをクリア
+				document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
 
-				// エラーメッセージを全クリア
-				document.querySelectorAll('.error-message').forEach(el => {
-					el.textContent = '';
-				});
-
-				// 入力値の取得
 				const staffId = staffIdSelect.value;
 				const date = dateInput.value;
 				const timeSlot = timeSlotSelect.value;
 				const menu = document.getElementById('menu').value;
 
-				// 個別の検証
 				if (!staffId) {
 					document.getElementById('staffIdError').textContent = 'スタッフを選択してください。';
 					isValid = false;
 				}
-
 				if (!date) {
 					document.getElementById('dateError').textContent = '日付を選択してください。';
 					isValid = false;
 				}
-
 				if (!timeSlot) {
 					document.getElementById('timeSlotError').textContent = '時間を選択してください。';
 					isValid = false;
 				}
-
 				if (!menu.trim()) {
 					document.getElementById('menuError').textContent = 'メニューを入力してください。';
 					isValid = false;
 				}
 
 				return isValid;
-			}
+			};
 
-			// ページロード時に既に値が入力されている場合は時間枠を取得
-			if (staffIdSelect.value && dateInput.value) {
-				updateTimeSlots();
-			}
-
-			// スタッフまたは日付が変更されたら時間枠を更新
+			// イベントリスナーの設定
 			staffIdSelect.addEventListener('change', updateTimeSlots);
 			dateInput.addEventListener('change', updateTimeSlots);
 
-			// フォーム送信時のバリデーション
-			form.addEventListener('submit', function (e) {
-				if (!validateForm()) {
-					e.preventDefault();
-					return false;
-				}
-			});
-
-			// グローバルに validateForm を公開（HTML属性の onsubmit から呼び出し可能にする）
-			window.validateForm = validateForm;
+			// 初期表示時に値があれば読み込み
+			if (staffIdSelect.value && dateInput.value) {
+				updateTimeSlots();
+			}
 		});
 	</script>
 
