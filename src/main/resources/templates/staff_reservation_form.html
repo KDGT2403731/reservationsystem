@@ -115,12 +115,25 @@
 						// 既存の予約時間を保存
 						const currentReservationTime = timeSlotSelect.querySelector('option[value!=""]')?.value;
 
-						// APIから取得した時間枠をオプションに追加
 						data.forEach(slot => {
 							const option = document.createElement('option');
-							// LocalTime形式 "09:00:00" から "09:00" に変換
-							const displayTime = slot.substring(0, 5);
-							option.value = slot;
+
+							let displayTime = "";
+							let valueTime = "";
+
+							// LocalTimeが配列 [時, 分] で届く場合の処理
+							if (Array.isArray(slot)) {
+								const hour = String(slot[0]).padStart(2, '0');
+								const minute = String(slot[1]).padStart(2, '0');
+								displayTime = `${hour}:${minute}`;
+								valueTime = `${hour}:${minute}:00`; // サーバー送信用のHH:mm:ss形式
+							} else if (typeof slot === 'string') {
+								// 万が一文字列で届いた場合のフォールバック
+								displayTime = slot.substring(0, 5);
+								valueTime = slot;
+							}
+
+							option.value = valueTime;
 							option.textContent = displayTime;
 							timeSlotSelect.appendChild(option);
 						});
