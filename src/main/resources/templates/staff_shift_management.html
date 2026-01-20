@@ -66,7 +66,7 @@
 			</thead>
 			<tbody>
 				<tr th:each="shift : ${staffShifts}">
-					<td th:text="${shift.date}"></td>
+					<td th:text="${#temporals.format(shift.date, 'yyyy-MM-dd')}"></td>
 					<td th:text="${shift.startTime}"></td>
 					<td th:text="${shift.endTime}"></td>
 					<td>
