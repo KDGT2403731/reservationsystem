@@ -13,7 +13,7 @@
 		<h1 th:text="${reservation.id == null ? '予約登録' : '予約編集'}"></h1>
 		<div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
 
-		<form
+		<form id="reservationForm"
 			th:action="${reservation.id == null ? '/reservation/new' : '/reservation/' + reservation.id + '/edit'}"
 			method="post" onsubmit="return validateForm()">
 			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
@@ -62,97 +62,164 @@
 	</div>
 
 	<script>
-		$(document).ready(function () {
-			// 利用可能な時間枠を取得する関数
-			function updateTimeSlots() {
-				const staffId = $('#staffId').val();
-				const date = $('#date').val();
-				const timeSlotSelect = $('#timeSlot');
-				const currentReservationTime = timeSlotSelect.val();
+		// =====================================
+		// 予約フォームの初期化と動的制御
+		// =====================================
+		document.addEventListener('DOMContentLoaded', function () {
+			// DOM要素の取得
+			const staffIdSelect = document.getElementById('staffId');
+			const dateInput = document.getElementById('date');
+			const timeSlotSelect = document.getElementById('timeSlot');
+			const form = document.getElementById('reservationForm');
+
+			/**
+			 * 利用可能な時間枠を取得してドロップダウンを更新する
+			 */
+			async function updateTimeSlots() {
+				const staffId = staffIdSelect.value;
+				const date = dateInput.value;
+				const timeSlotError = document.getElementById('timeSlotError');
 
 				// エラーメッセージをクリア
-				$('#timeSlotError').text('');
+				timeSlotError.textContent = '';
 
 				// 時間枠のドロップダウンをリセット
-				timeSlotSelect.empty();
-				timeSlotSelect.append($('<option></option>')
-					.attr('value', '')
-					.attr('disabled', true)
-					.attr('selected', true)
-					.text('希望の時間を選択してください')
-				);
+				timeSlotSelect.innerHTML = '';
+				const defaultOption = document.createElement('option');
+				defaultOption.value = '';
+				defaultOption.disabled = true;
+				defaultOption.selected = true;
+				defaultOption.textContent = '希望の時間を選択してください';
+				timeSlotSelect.appendChild(defaultOption);
 
-				// スタッフと日付が両方選択されている場合のみ処理
-				if (staffId && date) {
-					// 実際のAPIコールで利用可能な時間枠を取得
-					$.get('/reservation/available-slots', {staffId: staffId, date: date}, function (data) {
-						if (data && data.length > 0) {
-							// dataはLocalTimeの配列（例: ["09:00:00", "10:00:00"]）
-							$.each(data, function (index, slot) {
-								// slotの値をそのまま使用（LocalTime形式）
-								// 表示用に整形（秒を削除して "HH:mm" 形式に）
-								const displayTime = slot.substring(0, 5); // "09:00:00" → "09:00"
-								timeSlotSelect.append($('<option></option>')
-									.attr('value', slot)  // 値はそのまま（LocalTime形式）
-									.text(displayTime));   // 表示は HH:mm 形式
-							});
+				// スタッフと日付が両方選択されていない場合は処理終了
+				if (!staffId || !date) {
+					return;
+				}
 
-							// 既存の予約時間があれば選択
-							if (currentReservationTime && data.includes(currentReservationTime)) {
-								timeSlotSelect.val(currentReservationTime);
-							}
-						} else {
-							timeSlotSelect.append('<option value="">利用可能な時間枠がありません</option>');
-						}
-					}).fail(function (xhr, status, error) {
-						console.error('時間枠取得エラー:', error);
-						timeSlotSelect.append('<option value="">時間枠の取得に失敗しました</option>');
+				try {
+					// APIから利用可能な時間枠を取得
+					const params = new URLSearchParams({
+						staffId: staffId,
+						date: date
 					});
+
+					const response = await fetch(`/reservation/available-slots?${params}`);
+
+					// レスポンスチェック
+					if (!response.ok) {
+						throw new Error(`HTTP error! status: ${response.status}`);
+					}
+
+					const data = await response.json();
+
+					// データが存在し、配列の場合のみ処理
+					if (Array.isArray(data) && data.length > 0) {
+						// 既存の予約時間を保存
+						const currentReservationTime = timeSlotSelect.querySelector('option[value!=""]')?.value;
+
+						// APIから取得した時間枠をオプションに追加
+						data.forEach(slot => {
+							const option = document.createElement('option');
+							// LocalTime形式 "09:00:00" から "09:00" に変換
+							const displayTime = slot.substring(0, 5);
+							option.value = slot;
+							option.textContent = displayTime;
+							timeSlotSelect.appendChild(option);
+						});
+
+						// 既存の予約時間があれば選択
+						if (currentReservationTime && data.includes(currentReservationTime)) {
+							timeSlotSelect.value = currentReservationTime;
+						}
+					} else {
+						// 利用可能な時間枠がない場合
+						const noOption = document.createElement('option');
+						noOption.value = '';
+						noOption.textContent = '利用可能な時間枠がありません';
+						timeSlotSelect.appendChild(noOption);
+					}
+				} catch (error) {
+					// エラーハンドリング
+					console.error('時間枠取得エラー:', error);
+					const errorOption = document.createElement('option');
+					errorOption.value = '';
+					errorOption.textContent = '時間枠の取得に失敗しました';
+					timeSlotSelect.appendChild(errorOption);
+					timeSlotError.textContent = 'エラーが発生しました。ページを再度読み込んでください。';
 				}
 			}
 
+			/**
+			 * フォーム送信時のバリデーション
+			 */
+			function validateForm() {
+				let isValid = true;
+
+				// エラーメッセージを全クリア
+				document.querySelectorAll('.error-message').forEach(el => {
+					el.textContent = '';
+				});
+
+				// 入力値の取得
+				const staffId = staffIdSelect.value;
+				const date = dateInput.value;
+				const timeSlot = timeSlotSelect.value;
+				const menu = document.getElementById('menu').value;
+
+				// 個別の検証
+				if (!staffId) {
+					document.getElementById('staffIdError').textContent = 'スタッフを選択してください。';
+					isValid = false;
+				}
+
+				if (!date) {
+					document.getElementById('dateError').textContent = '日付を選択してください。';
+					isValid = false;
+				} else {
+					// 過去日の選択を防ぐ
+					const today = new Date();
+					today.setHours(0, 0, 0, 0);
+					const selectedDate = new Date(date);
+
+					if (selectedDate < today) {
+						document.getElementById('dateError').textContent = '過去の日付は選択できません。';
+						isValid = false;
+					}
+				}
+
+				if (!timeSlot) {
+					document.getElementById('timeSlotError').textContent = '時間を選択してください。';
+					isValid = false;
+				}
+
+				if (!menu.trim()) {
+					document.getElementById('menuError').textContent = 'メニューを入力してください。';
+					isValid = false;
+				}
+
+				return isValid;
+			}
+
 			// ページロード時に既に値が入力されている場合は時間枠を取得
-			if ($('#staffId').val() && $('#date').val()) {
+			if (staffIdSelect.value && dateInput.value) {
 				updateTimeSlots();
 			}
 
 			// スタッフまたは日付が変更されたら時間枠を更新
-			$('#staffId').change(updateTimeSlots);
-			$('#date').change(updateTimeSlots);
+			staffIdSelect.addEventListener('change', updateTimeSlots);
+			dateInput.addEventListener('change', updateTimeSlots);
 
 			// フォーム送信時のバリデーション
-			$('#reservationForm').on('submit', function (e) {
-				let isValid = true;
-				$('.error-message').text('');
-
-				const staffId = $('#staffId').val();
-				const date = $('#date').val();
-				const timeSlot = $('#timeSlot').val();
-				const menu = $('#menu').val();
-
-				if (!staffId) {
-					$('#staffIdError').text('スタッフを選択してください。');
-					isValid = false;
-				}
-				if (!date) {
-					$('#dateError').text('日付を選択してください。');
-					isValid = false;
-				}
-				if (!timeSlot) {
-					$('#timeSlotError').text('時間を選択してください。');
-					isValid = false;
-				}
-				if (!menu.trim()) {
-					$('#menuError').text('メニューを入力してください。');
-					isValid = false;
-				}
-
-				if (!isValid) {
+			form.addEventListener('submit', function (e) {
+				if (!validateForm()) {
 					e.preventDefault();
+					return false;
 				}
-
-				return isValid;
 			});
+
+			// グローバルに validateForm を公開（HTML属性の onsubmit から呼び出し可能にする）
+			window.validateForm = validateForm;
 		});
 	</script>
 
