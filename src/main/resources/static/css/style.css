@@ -184,7 +184,7 @@ button[type="submit"] {
 	text-decoration: none;
 	border-radius: 6px;
 	cursor: pointer;
-	transition: background-color 0.2s, box-shadow 0.2s;
+	transition: background-color 0.2s, box-shadow 0.2s, all 0.3s ease;
 	border: 1px solid transparent;
 	box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 	background-color: var(--primary-color);
@@ -195,6 +195,7 @@ button[type="submit"] {
 .button:hover,
 button[type="submit"]:hover {
 	background-color: #008784;
+	transform: translateY(-5px);
 	border-color: #00706e;
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
