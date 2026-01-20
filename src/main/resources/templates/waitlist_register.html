@@ -36,7 +36,7 @@
 		<!-- キャンセル待ち登録フォーム -->
 		<form th:action="@{/waitlist/register}" method="post" onsubmit="return validateForm()">
 			<!-- CSRF トークン（実運用では必須） -->
-			<!-- <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"> -->
+			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
 			<!-- 入力ブロック：スタッフ選択 -->
 			<p>
