@@ -70,8 +70,10 @@
 					<td th:text="${shift.endTime}"></td>
 					<td>
 						<form th:action="@{/admin/shifts/{id}/delete(id=${shift.id})}" method="post"
-							onsubmit="return confirm('このシフトを削除してもよろしいですか？');">
-							<button type="submit" class="button danger">削除</button>
+							style="display:inline;">
+							<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+							<button type="submit" class="button danger"
+								onclick="return confirm('このシフトを削除してもよろしいですか？');">削除</button>
 						</form>
 					</td>
 				</tr>
