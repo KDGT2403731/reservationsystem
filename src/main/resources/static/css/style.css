@@ -195,7 +195,7 @@ button[type="submit"] {
 .button:hover,
 button[type="submit"]:hover {
 	background-color: #008784;
-	transform: translateY(-5px);
+	transform: translateY(-3px);
 	border-color: #00706e;
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
@@ -210,7 +210,7 @@ button[type="submit"]:hover {
 .button.secondary:hover {
 	background-color: #5a6268;
 	border-color: #4e555b;
-	transform: translateY(-5px);
+	transform: translateY(-3px);
 }
 
 /* 危険操作ボタン */
@@ -223,7 +223,7 @@ button[type="submit"]:hover {
 .button.danger:hover {
 	background-color: #c82333;
 	border-color: #bd2130;
-	transform: translateY(-5px);
+	transform: translateY(-3px);
 }
 
 /* ボタングループ */
