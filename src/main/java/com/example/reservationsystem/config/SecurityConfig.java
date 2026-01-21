@@ -34,7 +34,7 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	UserDetailsService userDetailsService(UserRepository userRepository) {
+	UserDetailsService userDetailsService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		return email -> userRepository.findByEmail(email)
 				.map(user -> org.springframework.security.core.userdetails.User.builder()
 						.username(user.getEmail())
