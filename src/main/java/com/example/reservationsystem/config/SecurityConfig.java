@@ -16,6 +16,11 @@ import com.example.reservationsystem.repository.UserRepository;
 @EnableWebSecurity
 public class SecurityConfig {
 	@Bean
+	PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(authorize -> authorize
 				.requestMatchers("/", "/login", "/css/**", "/js/**").permitAll()
@@ -44,8 +49,4 @@ public class SecurityConfig {
 				.orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 	}
 
-	@Bean
-	PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
 }
