@@ -27,30 +27,22 @@ public class WaitlistService {
 		this.reservationService = reservationService;
 	}
 
-	/**
-	 * ユーザーのキャンセル待ち一覧を取得
-	 */
+	// ユーザーのキャンセル待ち一覧を取得
 	public List<Waitlist> getUserWaitlists(User user, String status) {
 		return waitlistRepository.findByUserAndRequestStatus(user, status);
 	}
 
-	/**
-	 * 日付でキャンセル待ちを検索
-	 */
+	// 日付でキャンセル待ちを検索
 	public List<Waitlist> getWaitlistsByDate(LocalDate date) {
 		return waitlistRepository.findByWaitDate(date);
 	}
 
-	/**
-	 * 全キャンセル待ちを取得
-	 */
+	// 全キャンセル待ちを取得
 	public List<Waitlist> getAllWaitlists() {
 		return waitlistRepository.findAll();
 	}
 
-	/**
-	 * キャンセル待ち登録
-	 */
+	// キャンセル待ち登録
 	@Transactional
 	public Waitlist registerWaitlist(User customer, Long staffId, LocalDate waitDate,
 			LocalTime startTime, String reservationMenu) {
@@ -84,9 +76,7 @@ public class WaitlistService {
 		return waitlistRepository.save(waitlist);
 	}
 
-	/**
-	 * キャンセル待ち削除（顧客による取り消し）
-	 */
+	// キャンセル待ち削除（顧客による取り消し）
 	@Transactional
 	public void cancelWaitlistByCustomer(Long waitlistId, User customer) {
 		Waitlist waitlist = waitlistRepository.findById(waitlistId)
@@ -99,9 +89,7 @@ public class WaitlistService {
 		waitlistRepository.delete(waitlist);
 	}
 
-	/**
-	 * キャンセル待ち削除（スタッフによる取り消し）
-	 */
+	// キャンセル待ち削除（スタッフによる取り消し）
 	@Transactional
 	public void cancelWaitlistByStaff(Long waitlistId) {
 		Waitlist waitlist = waitlistRepository.findById(waitlistId)
@@ -110,9 +98,7 @@ public class WaitlistService {
 		waitlistRepository.delete(waitlist);
 	}
 
-	/**
-	 * キャンセル待ちから予約確定（顧客による確定）
-	 */
+	// キャンセル待ちから予約確定（顧客による確定）
 	@Transactional
 	public void confirmReservationFromWaitlist(Long waitlistId, User customer) {
 		Waitlist waitlist = waitlistRepository.findById(waitlistId)
@@ -143,9 +129,7 @@ public class WaitlistService {
 		waitlistRepository.delete(waitlist);
 	}
 
-	/**
-	 * キャンセル待ちから予約確定（スタッフによる確定）
-	 */
+	// キャンセル待ちから予約確定（スタッフによる確定）
 	@Transactional
 	public void confirmReservationByStaff(Long waitlistId) {
 		Waitlist waitlist = waitlistRepository.findById(waitlistId)
@@ -161,9 +145,7 @@ public class WaitlistService {
 		waitlistRepository.delete(waitlist);
 	}
 
-	/**
-	 * キャンセル待ちに手動通知
-	 */
+	// キャンセル待ちに手動通知
 	@Transactional
 	public void notifyCustomer(Long waitlistId) {
 		Waitlist waitlist = waitlistRepository.findById(waitlistId)
@@ -182,9 +164,7 @@ public class WaitlistService {
 		waitlistRepository.save(waitlist);
 	}
 
-	/**
-	 * 顧客への通知送信（ダミー実装）
-	 */
+	// 顧客への通知送信（ダミー実装）
 	private void sendNotificationToCustomer(Long userId, LocalDate date, LocalTime timeSlot) {
 		System.out.println("--- [WAITLIST NOTIFICATION] ---");
 		System.out.println("User ID: " + userId + " is notified.");
