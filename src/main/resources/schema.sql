@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS reservation CASCADE;
 DROP TABLE IF EXISTS shift CASCADE;
 -- 既存テーブル users を依存関係ごと削除
 DROP TABLE IF EXISTS users CASCADE;
-
+-- 既存テーブル waitlist を依存関係ごと削除
 DROP TABLE IF EXISTS waitlist CASCADE;
 
 CREATE TABLE users (
