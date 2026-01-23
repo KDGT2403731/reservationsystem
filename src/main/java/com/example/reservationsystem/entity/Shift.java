@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 public class Shift {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id; // シフトID
+	private Long id; // シフトID
 
 	// Userエンティティとの多対一の関係 (Many-to-One)
 	@ManyToOne
