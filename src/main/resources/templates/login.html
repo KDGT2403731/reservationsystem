@@ -34,6 +34,11 @@
 				<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 			</div>
 		</form>
+		<p style="text-align: center; margin-top: 30px; border-top: 1px solid #e9ecef; padding-top: 20px;">
+			アカウントをお持ちでないですか？<br>
+			<a th:href="@{/register}"
+				style="color: var(--primary-color); text-decoration: none; font-weight: bold; font-size: 1.1rem;">新規登録はこちら</a>
+		</p>
 	</div>
 </body>
 
