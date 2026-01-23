@@ -14,6 +14,34 @@ java {
 	}
 }
 
+// UTF-8 エンコーディング設定（重要）
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc) {
+	options.encoding = 'UTF-8'
+}
+
+// リソースファイルのエンコーディング設定
+tasks.withType(ProcessResources) {
+	filteringCharset = 'UTF-8'
+}
+
+// Gradle 実行時の JVM エンコーディング設定
+tasks.named('test') {
+	useJUnitPlatform()
+	
+	// テスト実行時の JVM エンコーディング設定
+	systemProperty 'file.encoding', 'UTF-8'
+}
+
+// プロジェクト全体のエンコーディング設定
+compileJava {
+	options.encoding = 'UTF-8'
+	options.compilerArgs = ['-Xlint:all']
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
