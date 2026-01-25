@@ -10,7 +10,7 @@
 <body>
 	<div class="container">
 		<h1>管理者ダッシュボード</h1>
-		<p>ようこそ、<span sec:authentication="name"></span>さん！（管理者）</p>
+		<p>ようこそ、<span sec:authentication="name"></span>さん！（管理者）<br>こちらは予約やシフトの管理ができます。</p>
 		<div class="main-nav">
 			<a th:href="@{/admin/reservations}" class="button">全予約管理</a>
 			<a th:href="@{/admin/shifts}" class="button">全シフト管理</a>
