@@ -10,7 +10,9 @@
 <body>
 	<div class="container">
 		<h1>管理者ダッシュボード</h1>
-		<p>ようこそ、<span sec:authentication="name"></span>さん！（管理者）<br>こちらは予約やシフトの管理ができる場所です。</p>
+		<p>ようこそ、<span sec:authentication="name"></span>さん！（管理者）
+			<br>このダッシュボードでは、全顧客の予約管理、スタッフのシフト管理、および経営分析に必要な統計データを確認できます。
+			<br>各メニューからシステム全体の運営状況を監視・管理してください。</p>
 		<div class="main-nav">
 			<a th:href="@{/admin/reservations}" class="button">全予約管理</a>
 			<a th:href="@{/admin/shifts}" class="button">全シフト管理</a>
