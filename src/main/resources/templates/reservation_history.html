@@ -50,7 +50,8 @@
 					<td th:text="${reservation.status}"></td>
 					<!-- 行内操作セル -->
 					<td>
-						<a th:href="@{/reservation/{id}/edit(id=${reservation.id})}" class="button secondary">編集</a>
+						<a th:href="@{/reservation/{id}/edit(id=${reservation.id})}"
+							class="button secondary">編集</a>
 						<form th:action="@{/reservation/{id}/cancel(id=${reservation.id})}" method="post"
 							style="display:inline;">
 							<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
