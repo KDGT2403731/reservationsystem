@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.reservationsystem.entity.Reservation;
 import com.example.reservationsystem.entity.User;
 import com.example.reservationsystem.entity.Waitlist;
 import com.example.reservationsystem.repository.UserRepository;
@@ -101,32 +102,50 @@ public class WaitlistService {
 	// キャンセル待ちから予約確定（顧客による確定）
 	@Transactional
 	public void confirmReservationFromWaitlist(Long waitlistId, User customer) {
+		// ★Step 1: 待機録を取得
 		Waitlist waitlist = waitlistRepository.findById(waitlistId)
 				.orElseThrow(() -> new IllegalArgumentException("Waitlist not found"));
 
+		// ★Step 2: 顧客の確認
 		if (!waitlist.getUser().getId().equals(customer.getId())) {
 			throw new IllegalStateException("他の顧客のキャンセル待ちは確定できません。");
 		}
 
+		// ★Step 3: ステータス確認
 		if (!"NOTIFIED".equals(waitlist.getRequestStatus())) {
 			throw new IllegalStateException("通知済みのキャンセル待ちのみ確定できます。");
 		}
 
+		// ★Step 4: 確認期限チェック
 		if (waitlist.getExpirationTime() != null &&
 				LocalDateTime.now().isAfter(waitlist.getExpirationTime())) {
 			waitlist.setRequestStatus("EXPIRED");
 			waitlistRepository.save(waitlist);
-			throw new IllegalStateException("確定期限が過ぎています。");
+			throw new IllegalStateException("確認期限が過ぎています。");
 		}
 
-		reservationService.createReservation(
+		// ★Step 5: 新規予約を作成（重要：トランザクション内で実行）
+		Reservation newReservation = reservationService.createReservation(
 				customer,
 				waitlist.getStaff().getId(),
 				waitlist.getWaitDate(),
 				waitlist.getStartTime(),
 				waitlist.getReservationMenu());
 
+		// ★Step 6: 予約が実際に保存されたか確認
+		if (newReservation == null || newReservation.getId() == null) {
+			throw new IllegalStateException("予約の保存に失敗しました。");
+		}
+
+		// ★Step 7: 待機録を削除
 		waitlistRepository.delete(waitlist);
+
+		// ★デバッグログ
+		System.out.println("✓ キャンセル待ちから予約確定完了:");
+		System.out.println("  - Waitlist ID: " + waitlistId);
+		System.out.println("  - New Reservation ID: " + newReservation.getId());
+		System.out.println("  - Customer: " + customer.getEmail());
+		System.out.println("  - Date: " + newReservation.getDate() + " " + newReservation.getTimeSlot());
 	}
 
 	// キャンセル待ちから予約確定（スタッフによる確定）
@@ -135,14 +154,26 @@ public class WaitlistService {
 		Waitlist waitlist = waitlistRepository.findById(waitlistId)
 				.orElseThrow(() -> new IllegalArgumentException("Waitlist not found"));
 
-		reservationService.createReservation(
+		// ★新規予約を作成
+		Reservation newReservation = reservationService.createReservation(
 				waitlist.getUser(),
 				waitlist.getStaff().getId(),
 				waitlist.getWaitDate(),
 				waitlist.getStartTime(),
 				waitlist.getReservationMenu());
 
+		// ★予約が実際に保存されたか確認
+		if (newReservation == null || newReservation.getId() == null) {
+			throw new IllegalStateException("予約の保存に失敗しました。");
+		}
+
+		// ★待機録を削除
 		waitlistRepository.delete(waitlist);
+
+		// ★デバッグログ
+		System.out.println("✓ スタッフがキャンセル待ちから予約確定:");
+		System.out.println("  - Waitlist ID: " + waitlistId);
+		System.out.println("  - New Reservation ID: " + newReservation.getId());
 	}
 
 	// キャンセル待ちに手動通知

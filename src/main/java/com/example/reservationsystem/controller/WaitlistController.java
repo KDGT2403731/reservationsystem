@@ -1,6 +1,9 @@
 // パッケージ宣言：キャンセル待ちに関する Web ルーティング一式
 package com.example.reservationsystem.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -102,21 +105,59 @@ public class WaitlistController {
 		return "redirect:/waitlist/register?success=cancelled";
 	}
 
+	/**
+	 * ★重要★ キャンセル待ちから予約を確定するエンドポイント
+	 * 
+	 * 流れ：
+	 * 1. waitlist/{id}/confirm を GET リクエスト
+	 * 2. WaitlistService.confirmReservationFromWaitlist() を実行
+	 * 3. 成功時：/reservation/history にリダイレクト
+	 * 4. 失敗時：/waitlist/register にエラー付きでリダイレクト
+	 */
 	@GetMapping("/waitlist/{id}/confirm")
 	public String confirmReservationFromWaitlist(
 			@PathVariable("id") Long waitlistId,
 			@AuthenticationPrincipal UserDetails userDetails,
 			Model model) {
 
-		User customer = userRepository.findByEmail(userDetails.getUsername())
-				.orElseThrow(() -> new RuntimeException("Customer not found"));
+		System.out.println(">>> [WaitlistController] 予約確定要求: WaitlistId=" + waitlistId);
 
 		try {
+			User customer = userRepository.findByEmail(userDetails.getUsername())
+					.orElseThrow(() -> new RuntimeException("Customer not found"));
+
+			System.out.println("✓ 顧客確認: " + customer.getEmail());
+
+			// ★キャンセル待ちから予約を確定（トランザクション内で実行）
 			waitlistService.confirmReservationFromWaitlist(waitlistId, customer);
+
+			System.out.println("✓ 予約確定成功\n");
+
+			// ★成功時：予約履歴ページにリダイレクト
 			return "redirect:/reservation/history?success=confirmed";
+
 		} catch (IllegalStateException e) {
-			// エラーメッセージをフラッシュ属性で渡す
-			return "redirect:/waitlist/register?error=" + e.getMessage();
+			System.out.println("✗ 予約確定失敗 (IllegalStateException): " + e.getMessage());
+			try {
+				String encodedError = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8.toString());
+				return "redirect:/waitlist/register?error=" + encodedError;
+			} catch (UnsupportedEncodingException ex) {
+				return "redirect:/waitlist/register?error=An error occurred";
+			}
+
+		} catch (IllegalArgumentException e) {
+			System.out.println("✗ 予約確定失敗 (IllegalArgumentException): " + e.getMessage());
+			try {
+				String encodedError = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8.toString());
+				return "redirect:/waitlist/register?error=" + encodedError;
+			} catch (UnsupportedEncodingException ex) {
+				return "redirect:/waitlist/register?error=Invalid waitlist ID";
+			}
+
+		} catch (Exception e) {
+			System.out.println("✗ 予約確定失敗 (予期しないエラー): " + e.getClass().getSimpleName() + " - " + e.getMessage());
+			e.printStackTrace();
+			return "redirect:/waitlist/register?error=Unexpected error occurred";
 		}
 	}
 
@@ -199,16 +240,26 @@ public class WaitlistController {
 		return "redirect:/staff/waitlist?success=cancelled";
 	}
 
+	/**
+	 * ★スタッフによるキャンセル待ちから予約確定
+	 */
 	@GetMapping("/staff/waitlist/{id}/confirm")
 	public String confirmReservationByStaff(
 			@PathVariable("id") Long waitlistId,
 			Model model) {
 		try {
+			System.out.println(">>> [WaitlistController] スタッフが予約確定要求: WaitlistId=" + waitlistId);
 			waitlistService.confirmReservationByStaff(waitlistId);
+			System.out.println("✓ スタッフによる予約確定成功\n");
 			return "redirect:/staff/reservations?success=confirmed";
 		} catch (IllegalStateException e) {
-			// エラーメッセージをフラッシュ属性で渡す
-			return "redirect:/staff/waitlist?error=" + e.getMessage();
+			System.out.println("✗ スタッフによる予約確定失敗: " + e.getMessage());
+			try {
+				String encodedError = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8.toString());
+				return "redirect:/staff/waitlist?error=" + encodedError;
+			} catch (UnsupportedEncodingException ex) {
+				return "redirect:/staff/waitlist?error=An error occurred";
+			}
 		}
 	}
 

@@ -56,19 +56,41 @@ public class ReservationService {
 	@Transactional
 	public Reservation createReservation(User customer, Long staffId, LocalDate date,
 			LocalTime timeSlot, String menu) {
+
+		System.out.println(">>> [ReservationService] 予約作成開始");
+		System.out.println("    Customer: " + customer.getEmail());
+		System.out.println("    StaffId: " + staffId);
+		System.out.println("    Date: " + date);
+		System.out.println("    TimeSlot: " + timeSlot);
+		System.out.println("    Menu: " + menu);
+
+		// ★Step 1: スタッフを取得
 		User staff = userRepository.findById(staffId)
 				.orElseThrow(() -> new IllegalArgumentException("Staff not found"));
+		System.out.println("✓ スタッフ取得: " + staff.getName());
+
+		// ★Step 2: シフト存在確認
 		boolean staffHasShift = shiftRepository.findByStaffAndDate(staff, date)
 				.map(shift -> !timeSlot.isBefore(shift.getStartTime())
 						&& !timeSlot.isAfter(shift.getEndTime().minusMinutes(1)))
 				.orElse(false);
+
 		if (!staffHasShift) {
+			System.out.println("✗ スタッフはこの時間帯にシフトがありません");
 			throw new IllegalStateException("Staff is not available at this time.");
 		}
+		System.out.println("✓ シフト確認完了");
 
-		if (reservationRepository.findByDateAndTimeSlotAndStaff(date, timeSlot, staff).isPresent()) {
+		// ★Step 3: 予約枠の確認
+		Optional<Reservation> existingReservation = reservationRepository.findByDateAndTimeSlotAndStaff(date, timeSlot,
+				staff);
+		if (existingReservation.isPresent()) {
+			System.out.println("✗ この時間枠は既に予約済み");
 			throw new IllegalStateException("This time slot is already booked.");
 		}
+		System.out.println("✓ 予約枠確認完了（空いています）");
+
+		// ★Step 4: 予約オブジェクトを作成
 		Reservation reservation = new Reservation();
 		reservation.setUser(customer);
 		reservation.setStaff(staff);
@@ -76,63 +98,100 @@ public class ReservationService {
 		reservation.setTimeSlot(timeSlot);
 		reservation.setMenu(menu);
 		reservation.setStatus("予約済");
-		return reservationRepository.save(reservation);
+
+		// ★Step 5: データベースに保存
+		Reservation saved = reservationRepository.save(reservation);
+
+		System.out.println("✓ 予約データベース保存完了");
+		System.out.println("  - Reservation ID: " + saved.getId());
+		System.out.println("  - Status: " + saved.getStatus());
+		System.out.println(">>> [ReservationService] 予約作成完了\n");
+
+		return saved;
 	}
 
 	@Transactional
 	public Reservation updateReservation(Long reservationId, LocalDate newDate,
 			LocalTime newTimeSlot, String newMenu) {
+
+		System.out.println(">>> [ReservationService] 予約更新開始: ID=" + reservationId);
+
 		Reservation reservation = reservationRepository.findById(reservationId)
 				.orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+
+		// ★新しい時間枠が既に予約されていないか確認
 		if (reservationRepository.findByDateAndTimeSlotAndStaff(newDate, newTimeSlot, reservation.getStaff())
 				.filter(r -> !r.getId().equals(reservationId))
 				.isPresent()) {
+			System.out.println("✗ 新しい時間枠は既に予約済み");
 			throw new IllegalStateException("This new time slot is already booked.");
 		}
 
+		// ★スタッフがその日にシフトを持っているか確認
 		boolean staffHasShift = shiftRepository.findByStaffAndDate(reservation.getStaff(), newDate)
 				.map(shift -> !newTimeSlot.isBefore(shift.getStartTime())
 						&& !newTimeSlot.isAfter(shift.getEndTime().minusMinutes(1)))
 				.orElse(false);
+
 		if (!staffHasShift) {
+			System.out.println("✗ スタッフはこの新しい時間帯にシフトがありません");
 			throw new IllegalStateException("Staff is not available at this new time.");
 		}
+
+		// ★更新
 		reservation.setDate(newDate);
 		reservation.setTimeSlot(newTimeSlot);
 		reservation.setMenu(newMenu);
-		return reservationRepository.save(reservation);
+
+		Reservation updated = reservationRepository.save(reservation);
+		System.out.println("✓ 予約更新完了\n");
+
+		return updated;
 	}
 
 	@Transactional
 	public void cancelReservation(Long reservationId) {
+
+		System.out.println(">>> [ReservationService] 予約キャンセル開始: ID=" + reservationId);
+
 		Reservation reservation = reservationRepository.findById(reservationId)
 				.orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+
 		reservation.setStatus("キャンセル済");
 		reservationRepository.save(reservation);
+
+		System.out.println("✓ 予約ステータスを『キャンセル済』に更新");
 
 		LocalDate date = reservation.getDate();
 		LocalTime timeSlot = reservation.getTimeSlot();
 		User staff = reservation.getStaff();
 
+		// ★この時間枠で待機中の顧客を探す
 		List<Waitlist> candidates = waitlistRepository.findByWaitDateAndStartTimeAndStaffAndRequestStatus(
 				date, timeSlot, staff, "PENDING");
 
 		if (!candidates.isEmpty()) {
+			System.out.println("✓ キャンセル待ち候補が見つかりました: " + candidates.size() + "件");
+
 			Waitlist topCandidate = candidates.stream()
 					.sorted(Comparator.comparing(Waitlist::getRequestedAt))
 					.findFirst().get();
 
-			// 3. 顧客へLINE通知を送る（ダミー処理）
-			// 実際にはLINE APIを呼び出す外部連携サービスが必要です。
+			// ★顧客へ通知を送る
 			sendNotificationToCustomer(topCandidate.getUser().getId(), date, timeSlot);
 
-			// 4. ウェイティングリストのステータスを更新
+			// ★待機録のステータスを『通知済』に更新
 			topCandidate.setRequestStatus("NOTIFIED");
 			topCandidate.setNotifiedAt(LocalDateTime.now());
-			// 通知期限 (例: 1時間後) を設定
 			topCandidate.setExpirationTime(LocalDateTime.now().plusHours(1));
 			waitlistRepository.save(topCandidate);
+
+			System.out.println("✓ キャンセル待ち（ID=" + topCandidate.getId() + "）を『通知済』に更新");
+		} else {
+			System.out.println("ℹ キャンセル待ち候補なし");
 		}
+
+		System.out.println(">>> [ReservationService] 予約キャンセル完了\n");
 	}
 
 	public List<User> getAllStaffs() {
