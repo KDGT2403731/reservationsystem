@@ -30,7 +30,10 @@
 		<h2>シフトの登録・変更</h2>
 		<form th:action="@{/staff/shifts}" method="post">
 			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-
+			<p>
+			    <label for="date">日付:</label>
+			    <input type="date" id="date" name="date" required>
+			</p>
 			<p>
 				<!-- ラベル -->
 				<label for="startTime">開始時間:</label>
