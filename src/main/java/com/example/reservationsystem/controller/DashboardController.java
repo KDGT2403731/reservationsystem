@@ -31,6 +31,12 @@ public class DashboardController {
 					reservationRepository.findByDateBetween(LocalDate.now().minusDays(7), LocalDate.now().plusDays(7)));
 			return "admin_dashboard";
 		} else if (currentUser.getRole().equals("STAFF")) {
+			// 修正：本日以降の予約を表示（デフォルトは今後30日間）
+			LocalDate startDate = LocalDate.now();
+			LocalDate endDate = LocalDate.now().plusDays(30);
+			model.addAttribute("upcomingReservations",
+					reservationRepository.findByStaffAndDateBetween(currentUser, startDate, endDate));
+			// 本日の予約を別途取得（ハイライト表示用）
 			model.addAttribute("todayReservations",
 					reservationRepository.findByStaffAndDateBetween(currentUser, LocalDate.now(), LocalDate.now()));
 			return "staff_dashboard";

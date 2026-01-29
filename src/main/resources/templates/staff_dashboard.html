@@ -19,7 +19,7 @@
 		<p>
 			ようこそ、<span sec:authentication="name"></span>さん！ (スタッフ)
 			<br>このダッシュボードでは、担当する予約の管理、自身のシフト確認、キャンセル待ちリストの管理が行えます。
-			<br>本日の予約スケジュールは下記で確認できます。
+			<br>本日および今後の予約スケジュールは下記で確認できます。
 		</p>
 		<!-- メインナビ（予約管理、シフト管理、ログアウト） -->
 		<div class="main-nav">
@@ -35,7 +35,8 @@
 				<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 			</form>
 		</div>
-		<!-- 本日の予約一覧セクション -->
+
+		<!-- 本日の予約セクション -->
 		<h2>本日の予約</h2>
 		<!-- テーブルで表示 -->
 		<table>
@@ -65,6 +66,52 @@
 				</tr>
 			</tbody>
 		</table>
+
+		<!-- 今後の予約セクション（30日間） -->
+		<h2>今後の予約（今後30日間）</h2>
+		<!-- テーブルで表示 -->
+		<table>
+			<thead>
+				<tr>
+					<th>顧客名</th>
+					<th>日付</th>
+					<th>時間</th>
+					<th>メニュー</th>
+					<th>ステータス</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="reservation : ${upcomingReservations}">
+					<!-- 顧客名 -->
+					<td th:text="${reservation.user.name}"></td>
+					<!-- 日付（ISO。必要なら #temporals.format） -->
+					<td th:text="${#temporals.format(reservation.date, 'yyyy-MM-dd')}"></td>
+					<!-- 時間（HH:mm で整形） -->
+					<td th:text="${#temporals.format(reservation.timeSlot, 'HH:mm')}"></td>
+					<!-- メニュー -->
+					<td th:text="${reservation.menu}"></td>
+					<!-- ステータス -->
+					<td th:text="${reservation.status}"></td>
+				</tr>
+				<!-- データが無い場合の代替行 -->
+				<tr th:if="${#lists.isEmpty(upcomingReservations)}">
+					<!-- 5 列分まとめて表示 -->
+					<td colspan="5">今後の予約はありません。</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<!-- 情報セクション -->
+		<div
+			style="background-color: #d1ecf1; padding: 15px; margin: 20px 0; border-radius: 5px; border: 1px solid #bee5eb;">
+			<h3 style="margin-top: 0; color: #0c5460;">ご注意</h3>
+			<ul style="margin: 0; padding-left: 20px; color: #0c5460;">
+				<li><strong>本日の予約：</strong> 本日中に対応する予約を表示しています</li>
+				<li><strong>今後の予約：</strong> 本日から30日以内の予約を表示しています</li>
+				<li>キャンセル待ちリストから確定された予約も表示されます</li>
+				<li>詳細な予約管理は「予約管理」ページをご確認ください</li>
+			</ul>
+		</div>
 	</div>
 </body>
 
