@@ -42,5 +42,5 @@ public class Reservation {
 
 	private String menu;
 
-	private String status = "予約済";
+	private String status = "予約済"; // 値: "予約済", "キャンセル済"
 }
