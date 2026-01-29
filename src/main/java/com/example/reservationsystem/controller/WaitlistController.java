@@ -105,15 +105,14 @@ public class WaitlistController {
 		return "redirect:/waitlist/register?success=cancelled";
 	}
 
-	/**
-	 * ★重要★ キャンセル待ちから予約を確定するエンドポイント
-	 * 
-	 * 流れ：
-	 * 1. waitlist/{id}/confirm を GET リクエスト
-	 * 2. WaitlistService.confirmReservationFromWaitlist() を実行
-	 * 3. 成功時：/reservation/history にリダイレクト
-	 * 4. 失敗時：/waitlist/register にエラー付きでリダイレクト
-	 */
+	// ★重要★ キャンセル待ちから予約を確定するエンドポイント
+	// 
+	// 流れ：
+	// 1. waitlist/{id}/confirm を GET リクエスト
+	// 2. WaitlistService.confirmReservationFromWaitlist() を実行
+	// 3. 成功時：/reservation/history にリダイレクト
+	// 4. 失敗時：/waitlist/register にエラー付きでリダイレクト
+	//
 	@GetMapping("/waitlist/{id}/confirm")
 	public String confirmReservationFromWaitlist(
 			@PathVariable("id") Long waitlistId,
