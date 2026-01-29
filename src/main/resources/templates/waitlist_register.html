@@ -34,7 +34,7 @@
 		</div>
 
 		<!-- キャンセル待ち登録フォーム -->
-		<form id="waitlistForm" th:action="@{/waitlist/register}" method="post" onsubmit="return validateForm()">
+		<form th:action="@{/waitlist/register}" method="post" onsubmit="return validateForm()">
 			<!-- CSRF トークン（実運用では必須） -->
 			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
@@ -67,9 +67,26 @@
 			<p>
 				<!-- 時間のラベル -->
 				<label for="startTime">希望時間:</label>
-				<!-- 時間の選択肢（動的に読み込み） -->
+				<!-- 時間の選択肢（30分刻みで生成） -->
 				<select id="startTime" name="startTime" required>
-					<option value="">日付とスタッフを選択してください</option>
+					<option value="">選択してください</option>
+					<!-- 09:00から16:30まで30分刻み -->
+					<option value="09:00">09:00</option>
+					<option value="09:30">09:30</option>
+					<option value="10:00">10:00</option>
+					<option value="10:30">10:30</option>
+					<option value="11:00">11:00</option>
+					<option value="11:30">11:30</option>
+					<option value="12:00">12:00</option>
+					<option value="12:30">12:30</option>
+					<option value="13:00">13:00</option>
+					<option value="13:30">13:30</option>
+					<option value="14:00">14:00</option>
+					<option value="14:30">14:30</option>
+					<option value="15:00">15:00</option>
+					<option value="15:30">15:30</option>
+					<option value="16:00">16:00</option>
+					<option value="16:30">16:30</option>
 				</select>
 				<!-- クライアントサイド検証のエラー表示領域 -->
 				<span class="error-message" id="startTimeError"></span>
@@ -165,131 +182,55 @@
 		</table>
 	</div>
 
-	<!-- 画面内スクリプト（動的な時間枠読み込み + バリデーション） -->
+	<!-- 画面内スクリプト（簡易バリデーション） -->
 	<script>
-		document.addEventListener('DOMContentLoaded', function () {
-			const staffIdSelect = document.getElementById('staffId');
-			const waitDateInput = document.getElementById('waitDate');
-			const startTimeSelect = document.getElementById('startTime');
-			const form = document.getElementById('waitlistForm');
+		// フォーム送信前のクライアントサイド検証関数
+		function validateForm() {
+			let isValid = true;
+			// 既存のエラーメッセージをクリア
+			$('.error-message').text('');
 
-			/**
-			 * 時間枠の更新処理
-			 */
-			async function updateTimeSlots() {
-				const staffId = staffIdSelect.value;
-				const date = waitDateInput.value;
+			// 入力値の現在値を取得
+			const staffId = $('#staffId').val();
+			const waitDate = $('#waitDate').val();
+			const startTime = $('#startTime').val();
+			const reservationMenu = $('#reservationMenu').val();
 
-				// スタッフか日付が未選択なら処理しない
-				if (!staffId || !date) {
-					startTimeSelect.innerHTML = '<option value="">日付とスタッフを選択してください</option>';
-					return;
-				}
+			// スタッフ未選択のチェック
+			if (!staffId) {
+				$('#staffIdError').text('スタッフを選択してください。');
+				isValid = false;
+			}
 
-				try {
-					const response = await fetch(`/reservation/available-slots?staffId=${staffId}&date=${date}`);
-
-					if (!response.ok) {
-						throw new Error('サーバーエラーが発生しました');
-					}
-
-					const data = await response.json();
-					startTimeSelect.innerHTML = '<option value="">時間を選択してください</option>';
-
-					if (data && data.length > 0) {
-						data.forEach(slot => {
-							const option = document.createElement('option');
-
-							let displayTime = "";
-							let valueTime = "";
-
-							// JavaのLocalTimeが[時, 分]の配列で届く場合
-							if (Array.isArray(slot)) {
-								const hh = String(slot[0]).padStart(2, '0');
-								const mm = String(slot[1]).padStart(2, '0');
-								displayTime = `${hh}:${mm}`;
-								valueTime = `${hh}:${mm}:00`; // 秒まで含めてvalueにする
-							}
-							// 万が一文字列で届く場合
-							else if (typeof slot === 'string') {
-								displayTime = slot.substring(0, 5);
-								valueTime = slot;
-							}
-
-							option.value = valueTime;
-							option.textContent = displayTime;
-							startTimeSelect.appendChild(option);
-						});
-					} else {
-						const option = document.createElement('option');
-						option.textContent = "予約可能な時間がありません";
-						option.disabled = true;
-						startTimeSelect.appendChild(option);
-					}
-				} catch (error) {
-					console.error('Fetch error:', error);
-					// 画面上のエラーメッセージ要素に表示（なければalert）
-					const errorDiv = document.querySelector('.error-message');
-					if (errorDiv) {
-						errorDiv.textContent = '時間枠の取得に失敗しました。ページを再読み込みしてください。';
-					} else {
-						alert('エラーが発生しました。コンソールで原因を確認してください。');
-					}
+			// 日付未入力のチェック
+			if (!waitDate) {
+				$('#waitDateError').text('日付を選択してください。');
+				isValid = false;
+			} else {
+				// 過去日チェック
+				const today = new Date();
+				today.setHours(0, 0, 0, 0);
+				const selectedDate = new Date(waitDate);
+				if (selectedDate < today) {
+					$('#waitDateError').text('過去の日付は選択できません。');
+					isValid = false;
 				}
 			}
 
-			// イベントリスナーの設定
-			staffIdSelect.addEventListener('change', updateTimeSlots);
-			waitDateInput.addEventListener('change', updateTimeSlots);
+			// 時間未選択のチェック
+			if (!startTime) {
+				$('#startTimeError').text('時間を選択してください。');
+				isValid = false;
+			}
 
-			// フォーム送信前のクライアントサイド検証関数
-			window.validateForm = function () {
-				let isValid = true;
-				// 既存のエラーメッセージをクリア
-				document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+			// メニュー未入力のチェック
+			if (!reservationMenu.trim()) {
+				$('#reservationMenuError').text('メニューを入力してください。');
+				isValid = false;
+			}
 
-				// 入力値の現在値を取得
-				const staffId = staffIdSelect.value;
-				const waitDate = waitDateInput.value;
-				const startTime = startTimeSelect.value;
-				const reservationMenu = document.getElementById('reservationMenu').value;
-
-				// スタッフ未選択のチェック
-				if (!staffId) {
-					document.getElementById('staffIdError').textContent = 'スタッフを選択してください。';
-					isValid = false;
-				}
-
-				// 日付未入力のチェック
-				if (!waitDate) {
-					document.getElementById('waitDateError').textContent = '日付を選択してください。';
-					isValid = false;
-				} else {
-					// 過去日チェック
-					const today = new Date();
-					today.setHours(0, 0, 0, 0);
-					const selectedDate = new Date(waitDate);
-					if (selectedDate < today) {
-						document.getElementById('waitDateError').textContent = '過去の日付は選択できません。';
-						isValid = false;
-					}
-				}
-
-				// 時間未選択のチェック
-				if (!startTime) {
-					document.getElementById('startTimeError').textContent = '時間を選択してください。';
-					isValid = false;
-				}
-
-				// メニュー未入力のチェック
-				if (!reservationMenu.trim()) {
-					document.getElementById('reservationMenuError').textContent = 'メニューを入力してください。';
-					isValid = false;
-				}
-
-				return isValid;
-			};
-		});
+			return isValid;
+		}
 	</script>
 </body>
 
