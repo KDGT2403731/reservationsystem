@@ -87,7 +87,6 @@ public class ReservationService {
 				.stream()
 				.filter(r -> !"キャンセル済".equals(r.getStatus())) // キャンセル済は重複とみなさない
 				.findFirst();
-
 		if (existingReservation.isPresent()) {
 			System.out.println("✗ この時間枠は既に予約済み（有効な予約が存在します）");
 			throw new IllegalStateException("This time slot is already booked.");
