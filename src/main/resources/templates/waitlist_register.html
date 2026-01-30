@@ -150,8 +150,8 @@
 					<td th:text="${waitlist.reservationMenu}"></td>
 					<!-- ステータス（PENDING/NOTIFIED/EXPIRED） -->
 					<td>
-						<span th:if="${waitlist.requestStatus == 'PENDING'}" style="color: #007bff;">待機中</span>
-						<span th:if="${waitlist.requestStatus == 'NOTIFIED'}" style="color: #28a745;">通知済</span>
+						<span th:if="${waitlist.requestStatus == 'PENDING'}" style="color: #ff00ff;">待機中</span>
+						<span th:if="${waitlist.requestStatus == 'NOTIFIED'}" style="color: #ff8c00;">通知済</span>
 						<span th:if="${waitlist.requestStatus == 'EXPIRED'}" style="color: #6c757d;">期限切れ</span>
 					</td>
 					<!-- 登録日時 -->
