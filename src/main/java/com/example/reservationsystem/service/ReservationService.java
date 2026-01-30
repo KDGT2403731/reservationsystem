@@ -82,10 +82,13 @@ public class ReservationService {
 		System.out.println("✓ シフト確認完了");
 
 		// Step 3: 予約枠の確認
-		Optional<Reservation> existingReservation = reservationRepository.findByDateAndTimeSlotAndStaff(date, timeSlot,
-				staff);
+		Optional<Reservation> existingReservation = reservationRepository
+				.findByDateAndTimeSlotAndStaff(date, timeSlot, staff)
+				.stream()
+				.filter(r -> !"キャンセル済".equals(r.getStatus())) // キャンセル済は重複とみなさない
+				.findFirst();
 		if (existingReservation.isPresent()) {
-			System.out.println("✗ この時間枠は既に予約済み");
+			System.out.println("✗ この時間枠は既に予約済み（有効な予約が存在します）");
 			throw new IllegalStateException("This time slot is already booked.");
 		}
 		System.out.println("✓ 予約枠確認完了（空いています）");
@@ -120,10 +123,16 @@ public class ReservationService {
 				.orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
 
 		// 新しい時間枠が既に予約されていないか確認
-		if (reservationRepository.findByDateAndTimeSlotAndStaff(newDate, newTimeSlot, reservation.getStaff())
-				.filter(r -> !r.getId().equals(reservationId))
-				.isPresent()) {
-			System.out.println("✗ 新しい時間枠は既に予約済み");
+		boolean isAlreadyBooked = reservationRepository
+				.findByDateAndTimeSlotAndStaff(newDate, newTimeSlot, reservation.getStaff())
+				.stream()
+				.filter(r -> !r.getId().equals(reservationId)) // 自分自身を除外
+				.filter(r -> !"キャンセル済".equals(r.getStatus())) // キャンセル済を除外
+				.findAny()
+				.isPresent();
+
+		if (isAlreadyBooked) {
+			System.out.println("✗ 新しい時間枠は既に有効な予約で埋まっています");
 			throw new IllegalStateException("This new time slot is already booked.");
 		}
 
@@ -211,7 +220,10 @@ public class ReservationService {
 		LocalTime shiftEnd = staffShift.get().getEndTime();
 
 		List<LocalTime> allPossibleSlots = generateTimeSlots(shiftStart, shiftEnd, 30);
-		List<Reservation> bookedSlots = reservationRepository.findByStaffAndDateBetween(staff, date, date);
+		List<Reservation> bookedSlots = reservationRepository.findByStaffAndDateBetween(staff, date, date)
+				.stream()
+				.filter(r -> !"キャンセル済".equals(r.getStatus())) // キャンセル済を表示候補から外さない
+				.collect(Collectors.toList());
 		return allPossibleSlots.stream()
 				.filter(slot -> bookedSlots.stream().noneMatch(res -> res.getTimeSlot().equals(slot)))
 				.collect(Collectors.toList());
