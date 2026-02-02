@@ -32,6 +32,7 @@ tasks.withType(ProcessResources) {
 compileJava {
 	options.encoding = 'UTF-8'
 	options.compilerArgs = ['-Xlint:all']
+	options.annotationProcessorPath = configurations.annotationProcessor
 }
 
 configurations {
