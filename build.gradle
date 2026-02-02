@@ -66,3 +66,7 @@ tasks.named('test') {
 	// テスト実行時の JVM エンコーディング設定
 	systemProperty 'file.encoding', 'UTF-8'
 }
+
+tasks.named('bootJar') {
+    archiveFileName = 'app.jar' // JARファイル名を固定化
+}
