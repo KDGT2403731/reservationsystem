@@ -242,12 +242,14 @@ public class ReservationService {
 	public Map<String, Long> getReservationCountByMenu(LocalDate startDate, LocalDate endDate) {
 		List<Reservation> reservations = reservationRepository.findByDateBetween(startDate, endDate);
 		return reservations.stream()
+				.filter(r -> !"キャンセル済".equals(r.getStatus()))
 				.collect(Collectors.groupingBy(Reservation::getMenu, Collectors.counting()));
 	}
 
 	public Map<String, Long> getReservationCountByStaff(LocalDate startDate, LocalDate endDate) {
 		List<Reservation> reservations = reservationRepository.findByDateBetween(startDate, endDate);
 		return reservations.stream()
+				.filter(r -> !"キャンセル済".equals(r.getStatus()))
 				.filter(r -> r.getStaff() != null)
 				.collect(Collectors.groupingBy(r -> r.getStaff().getName(), Collectors.counting()));
 	}
