@@ -26,11 +26,11 @@ public class RegisterController {
 
 	@PostMapping("/register")
 	public String register(
-			@RequestParam String name,
-			@RequestParam String email,
-			@RequestParam String password,
-			@RequestParam String confirmPassword,
-			@RequestParam String role,
+			@RequestParam("name") String name,
+			@RequestParam("email") String email,
+			@RequestParam("password") String password,
+			@RequestParam("confirmPassword") String confirmPassword,
+			@RequestParam("role") String role,
 			Model model) {
 
 		// バリデーション：役割の確認
