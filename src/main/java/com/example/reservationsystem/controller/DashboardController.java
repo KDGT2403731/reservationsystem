@@ -26,11 +26,11 @@ public class DashboardController {
 	public String dashboard(@AuthenticationPrincipal UserDetails userDetails, Model model) {
 		User currentUser = userRepository.findByEmail(userDetails.getUsername())
 				.orElseThrow(() -> new RuntimeException("User not found"));
-		if (currentUser.getRole().contains("ADMIN")) {
+		if (currentUser.getRole().equals("ADMIN")) {
 			model.addAttribute("recentReservations",
 					reservationRepository.findByDateBetween(LocalDate.now().minusDays(7), LocalDate.now().plusDays(7)));
 			return "admin_dashboard";
-		} else if (currentUser.getRole().contains("STAFF")) {
+		} else if (currentUser.getRole().equals("STAFF")) {
 			// 修正：本日以降の予約を表示（デフォルトは今後30日間）
 			LocalDate startDate = LocalDate.now();
 			LocalDate endDate = LocalDate.now().plusDays(30);
